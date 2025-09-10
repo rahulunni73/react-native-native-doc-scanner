@@ -1,0 +1,115 @@
+{
+  "name": "react-native-native-doc-scanner",
+  "version": "1.0.0",
+  "description": "High-performance cross-platform document scanner with native bridge architecture and TurboModule compatibility",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "react-native": "src/index.ts",
+  "source": "src/index.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/username/react-native-native-doc-scanner.git"
+  },
+  "homepage": "https://github.com/username/react-native-native-doc-scanner#readme",
+  "bugs": {
+    "url": "https://github.com/username/react-native-native-doc-scanner/issues"
+  },
+  "author": {
+    "name": "Your Name",
+    "email": "your.email@example.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "react-native",
+    "document-scanner",
+    "native-bridge",
+    "ios",
+    "android",
+    "visionkit",
+    "ml-kit",
+    "pdf-generator",
+    "cross-platform",
+    "turbomodule-ready",
+    "document-capture",
+    "ocr",
+    "image-processing"
+  ],
+  "files": [
+    "lib/",
+    "android/",
+    "ios/",
+    "src/",
+    "*.podspec",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/.*",
+    "!example/"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint \"src/**/*.{ts,tsx}\" --fix",
+    "lint:check": "eslint \"src/**/*.{ts,tsx}\"",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "clean": "rm -rf lib/",
+    "example": "cd example && npm run start",
+    "example:android": "cd example && npx react-native run-android",
+    "example:ios": "cd example && npx react-native run-ios",
+    "release": "npm run build && npm publish",
+    "postversion": "git push && git push --tags"
+  },
+  "peerDependencies": {
+    "react": ">=17.0.0",
+    "react-native": ">=0.68.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-native": "^0.70.0",
+    "typescript": "^4.9.0"
+  },
+  "jest": {
+    "preset": "react-native",
+    "testEnvironment": "node",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json"
+    ],
+    "transform": {
+      "^.+\\.(ts|tsx)$": "ts-jest"
+    },
+    "testMatch": [
+      "**/__tests__/**/*.(ts|tsx|js)",
+      "**/*.(test|spec).(ts|tsx|js)"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.{ts,tsx}",
+      "!src/**/*.d.ts"
+    ]
+  },
+  "eslintConfig": {
+    "extends": [
+      "@react-native-community",
+      "@typescript-eslint/recommended"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint"
+    ],
+    "rules": {
+      "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+      "@typescript-eslint/no-explicit-any": "warn"
+    }
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=7.0.0"
+  }
+}
