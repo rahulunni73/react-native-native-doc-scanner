@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
 import android.text.format.Formatter;
 import android.util.Log;
 
@@ -184,7 +185,7 @@ public class ScannerActivity extends AppCompatActivity {
                 android.database.Cursor cursor = getContentResolver().query(uri, null, null, null, null);
                 if (cursor != null) {
                     try {
-                        int sizeIndex = cursor.getColumnIndex(android.provider.OpenableColumns.SIZE);
+                        int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
                         if (sizeIndex != -1 && cursor.moveToFirst()) {
                             return cursor.getLong(sizeIndex);
                         }
