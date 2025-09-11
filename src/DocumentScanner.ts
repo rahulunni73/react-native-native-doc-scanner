@@ -198,8 +198,8 @@ class NativeDocumentScanner {
       return 'isGalleryImportRequired must be a boolean';
     }
 
-    if (typeof config.pageLimit !== 'number' || config.pageLimit < 1 || config.pageLimit > 10) {
-      return 'pageLimit must be a number between 1 and 10';
+    if (typeof config.pageLimit !== 'number' || (config.pageLimit !== -1 && (config.pageLimit < 1 || config.pageLimit > 50))) {
+      return 'pageLimit must be a number between 1 and 50, or -1 for unlimited pages';
     }
 
     // Platform-specific validations
