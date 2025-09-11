@@ -8,15 +8,15 @@
   "source": "src/index.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/username/react-native-native-doc-scanner.git"
+    "url": "https://github.com/rahulunni73/react-native-native-doc-scanner.git"
   },
-  "homepage": "https://github.com/username/react-native-native-doc-scanner#readme",
+  "homepage": "https://github.com/rahulunni73/react-native-native-doc-scanner#readme",
   "bugs": {
-    "url": "https://github.com/username/react-native-native-doc-scanner/issues"
+    "url": "https://github.com/rahulunni73/react-native-native-doc-scanner/issues"
   },
   "author": {
-    "name": "Your Name",
-    "email": "your.email@example.com"
+    "name": "rahulunni73",
+    "email": "rahulunni73@gmail.com"
   },
   "license": "MIT",
   "keywords": [
