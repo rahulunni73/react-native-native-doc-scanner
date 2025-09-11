@@ -9,6 +9,7 @@ import Foundation
 import UIKit
 import VisionKit
 import PDFKit
+import React
 
 
 @objc(NativeDocScanner)
@@ -49,7 +50,7 @@ class NativeDocScanner: NSObject, RCTBridgeModule{
 
 
 
-extension ScannerModule:VNDocumentCameraViewControllerDelegate {
+extension NativeDocScanner:VNDocumentCameraViewControllerDelegate {
   
   func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFinishWith scan: VNDocumentCameraScan) {
     controller.dismiss(animated: true, completion: nil)
