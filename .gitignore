@@ -73,3 +73,7 @@ temp/
 # OS generated files
 Thumbs.db
 ehthumbs.db
+
+# Internal documentation (keep private)
+PROJECT_STATUS.md
+SETUP_PROCESS.md
