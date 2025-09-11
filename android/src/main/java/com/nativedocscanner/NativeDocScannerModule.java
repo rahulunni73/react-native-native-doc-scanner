@@ -19,6 +19,7 @@ public class NativeDocScannerModule extends ReactContextBaseJavaModule implement
     private static final int SCANNER_REQUEST_CODE = 1001;
     private Callback successCallback;
     private Callback errorCallback;
+    private boolean callbackInvoked = false;
 
     NativeDocScannerModule(ReactApplicationContext context) {
 
@@ -40,6 +41,7 @@ public class NativeDocScannerModule extends ReactContextBaseJavaModule implement
         try {
             this.successCallback = successCallback;
             this.errorCallback = errorCallback;
+            this.callbackInvoked = false; // Reset the flag for new scan
 
             Activity currentActivity = getCurrentActivity();
 
@@ -63,7 +65,9 @@ public class NativeDocScannerModule extends ReactContextBaseJavaModule implement
 
         Log.d("Scanner Module","called" );
 
-        if (requestCode == SCANNER_REQUEST_CODE) {
+        if (requestCode == SCANNER_REQUEST_CODE && !callbackInvoked && successCallback != null && errorCallback != null) {
+            callbackInvoked = true; // Mark callback as invoked to prevent multiple calls
+            
             if (resultCode == Activity.RESULT_OK) {
                 String scannedDocumentPath = data.getStringExtra("ScanResult");
                 if (scannedDocumentPath != null) {
@@ -72,7 +76,11 @@ public class NativeDocScannerModule extends ReactContextBaseJavaModule implement
                     errorCallback.invoke("No document path received");
                 }
             } else if (resultCode == Activity.RESULT_CANCELED) {
-                errorCallback.invoke("Scan canceled");
+                String errorMessage = "Scan canceled";
+                if (data != null && data.hasExtra("error")) {
+                    errorMessage = data.getStringExtra("error");
+                }
+                errorCallback.invoke(errorMessage);
             } else {
                 errorCallback.invoke("Scan failed");
             }
