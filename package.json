@@ -1,6 +1,6 @@
 {
   "name": "react-native-native-doc-scanner",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "High-performance cross-platform document scanner with native bridge architecture and TurboModule compatibility",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -104,7 +104,12 @@
       "@typescript-eslint"
     ],
     "rules": {
-      "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          "argsIgnorePattern": "^_"
+        }
+      ],
       "@typescript-eslint/no-explicit-any": "warn"
     }
   },
