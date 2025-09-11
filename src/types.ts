@@ -13,8 +13,11 @@ export interface ScannerConfig {
   /** Whether to allow importing images from gallery (Android only) */
   isGalleryImportRequired: boolean;
   
-  /** Maximum number of pages to scan (1-10) */
+  /** Maximum number of pages to scan (1-50, or -1 for unlimited) */
   pageLimit: number;
+  
+  /** Maximum total file size in bytes (default: 100MB) */
+  maxSizeLimit?: number;
 }
 
 /**
@@ -47,6 +50,15 @@ export interface ScannerResult {
   
   /** Number of pages in the generated PDF */
   PdfPageCount: number;
+  
+  /** Total size of all scanned images in bytes */
+  totalImageSize: number;
+  
+  /** Size of the generated PDF in bytes */
+  pdfSize: number;
+  
+  /** Individual image sizes in bytes */
+  imageSizes: {[key: string]: number};
 }
 
 /**
@@ -73,6 +85,9 @@ export enum ScannerError {
   
   /** Unknown error occurred */
   UNKNOWN_ERROR = 'UNKNOWN_ERROR',
+  
+  /** File size limit exceeded */
+  SIZE_LIMIT_EXCEEDED = 'SIZE_LIMIT_EXCEEDED',
 }
 
 /**

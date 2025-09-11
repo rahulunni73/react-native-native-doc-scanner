@@ -16,6 +16,7 @@ High-performance cross-platform document scanner for React Native with native br
 - ⚡ **High Performance** - Native implementation for optimal speed
 - 🔧 **TypeScript Support** - Full type definitions included
 - 🎨 **Customizable** - Multiple scanner modes and quality settings
+- 📏 **Size Management** - Built-in file size validation with configurable limits
 
 ## 📦 Installation
 
@@ -51,7 +52,8 @@ import NativeDocScanner, { ScannerConfig, SCANNER_MODE } from 'react-native-nati
 const config: ScannerConfig = {
   scannerMode: SCANNER_MODE.FULL,
   isGalleryImportRequired: true, // Android only
-  pageLimit: 5
+  pageLimit: 5,
+  maxSizeLimit: 50 * 1024 * 1024 // 50MB limit (optional)
 };
 
 // Callback-based API
@@ -79,11 +81,14 @@ const scanDocuments = async () => {
     const config: ScannerConfig = {
       scannerMode: SCANNER_MODE.FULL,
       isGalleryImportRequired: false,
-      pageLimit: 3
+      pageLimit: 3,
+      maxSizeLimit: 100 * 1024 * 1024 // 100MB limit
     };
 
     const result = await NativeDocScanner.scanDocumentAsync(config);
     console.log('Scanned documents:', result);
+    console.log('Total size:', result.totalImageSize, 'bytes');
+    console.log('PDF size:', result.pdfSize, 'bytes');
   } catch (error) {
     console.error('Scanning failed:', error);
   }
@@ -99,6 +104,7 @@ const scanDocuments = async () => {
 | `scannerMode` | `SCANNER_MODE` | Quality/speed tradeoff | `SCANNER_MODE.FULL` |
 | `isGalleryImportRequired` | `boolean` | Allow gallery import (Android only) | `false` |
 | `pageLimit` | `number` | Maximum pages to scan (1-50, or -1 for unlimited) | `5` |
+| `maxSizeLimit` | `number` | Maximum total file size in bytes (optional) | `104857600` (100MB) |
 
 ### Scanner Modes
 
@@ -107,6 +113,45 @@ const scanDocuments = async () => {
 | `FULL` | `1` | Highest | Slower | Best quality with advanced processing |
 | `BASE_WITH_FILTER` | `2` | Medium | Medium | Good quality with basic filtering |
 | `BASE` | `3` | Basic | Fastest | Quick scanning with minimal processing |
+
+### File Size Management
+
+The library includes built-in file size validation to prevent large uploads:
+
+- **Default Limit**: 100MB total size for all scanned images
+- **Cross-Platform**: Works on both iOS and Android
+- **Real-time Validation**: 
+  - **iOS**: Checks size before processing each page during scanning
+  - **Android**: Validates total size after scanning completes
+- **User Alerts**: Native platform alerts when size limit is exceeded
+- **Configurable**: Set custom limits via `maxSizeLimit` parameter
+- **Size Reporting**: Returns detailed size information in scan results
+- **Error Handling**: Returns `SIZE_LIMIT_EXCEEDED` error when limit exceeded
+
+```typescript
+// Configure size limit (50MB example)
+const config: ScannerConfig = {
+  scannerMode: SCANNER_MODE.FULL,
+  pageLimit: 10,
+  maxSizeLimit: 50 * 1024 * 1024 // 50MB limit
+};
+
+// Check sizes in result
+NativeDocScanner.scanDocumentAsync(config)
+  .then(result => {
+    console.log(`Total images: ${result.totalImageSize} bytes`);
+    console.log(`PDF size: ${result.pdfSize} bytes`);
+    console.log('Individual sizes:', result.imageSizes);
+  })
+  .catch(error => {
+    if (error.message === 'SIZE_LIMIT_EXCEEDED') {
+      console.log('Scanning stopped due to size limit');
+      // Handle size limit exceeded
+      // iOS: User was alerted during scanning
+      // Android: User was alerted after scanning
+    }
+  });
+```
 
 ## 📋 API Reference
 
@@ -152,6 +197,9 @@ interface ScannerResult {
   isPdfAvailable: boolean;               // Whether PDF was generated
   PdfUri: string;                        // Path to generated PDF
   PdfPageCount: number;                  // Number of pages in PDF
+  totalImageSize: number;                // Total size of all images in bytes
+  pdfSize: number;                       // Size of generated PDF in bytes
+  imageSizes: {[key: string]: number};   // Individual image sizes in bytes
 }
 ```
 
@@ -183,8 +231,8 @@ This library uses **automatic architecture detection** to provide optimal perfor
 
 | Platform | Framework | Features |
 |----------|-----------|----------|
-| **iOS** | VisionKit | Document camera, automatic edge detection, multi-page |
-| **Android** | ML Kit | Document scanner, gallery import, image processing |
+| **iOS** | VisionKit | Document camera, automatic edge detection, multi-page, real-time size validation |
+| **Android** | ML Kit | Document scanner, gallery import, image processing, post-scan size validation |
 
 ## 📱 Platform Support
 

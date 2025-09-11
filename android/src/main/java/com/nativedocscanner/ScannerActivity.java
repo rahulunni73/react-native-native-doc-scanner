@@ -1,9 +1,11 @@
 package com.nativedocscanner;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.format.Formatter;
 import android.util.Log;
 
 import androidx.activity.result.ActivityResult;
@@ -21,12 +23,16 @@ import com.turbodocscanner.R;
 
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ScannerActivity extends AppCompatActivity {
 
     private ActivityResultLauncher<IntentSenderRequest> scannerLauncher;
+    private long sizeLimit = 100 * 1024 * 1024; // 100MB default
+    private HashMap<String, Object> scannerConfig;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +42,15 @@ public class ScannerActivity extends AppCompatActivity {
 
         // Get the Intent and retrieve the HashMap
         Intent intent = getIntent();
-        HashMap<String, Object> scannerConfig = (HashMap<String, Object>) intent.getSerializableExtra("scannerConfig");
+        scannerConfig = (HashMap<String, Object>) intent.getSerializableExtra("scannerConfig");
+        
+        // Set custom size limit if provided
+        if (scannerConfig != null && scannerConfig.containsKey("maxSizeLimit")) {
+            Object sizeLimitObj = scannerConfig.get("maxSizeLimit");
+            if (sizeLimitObj instanceof Number) {
+                sizeLimit = ((Number) sizeLimitObj).longValue();
+            }
+        }
 
 
         GmsDocumentScannerOptions options=null;
@@ -98,24 +112,48 @@ public class ScannerActivity extends AppCompatActivity {
 
             Log.d("Scanner",getApplicationContext().getString(R.string.scan_result, result));
 
+            // Calculate total size and validate
+            long totalImageSize = 0;
+            Map<String, Long> imageSizes = new HashMap<>();
+            
+            if(result.getPages() != null) {
+                for(int index = 0; index < result.getPages().size(); index++) {
+                    Uri imageUri = result.getPages().get(index).getImageUri();
+                    long imageSize = getFileSize(imageUri);
+                    totalImageSize += imageSize;
+                    imageSizes.put("image " + index, imageSize);
+                    
+                    // Check size limit
+                    if (totalImageSize > sizeLimit) {
+                        showSizeExceededDialog(totalImageSize, imageSize, index + 1);
+                        return;
+                    }
+                }
+            }
+
             Map<String,Object> scanResult = new HashMap<String,Object>();
 
             if(result.getPages() != null) {
-
                 Map<String,Object> imageUris = new HashMap<String,Object>();
                 for(int index = 0; index < result.getPages().size();index++) {
                     imageUris.put("image "+index, String.valueOf(result.getPages().get(index).getImageUri()));
                 }
-
                 scanResult.put("imagePaths",imageUris);
             }
 
-
+            long pdfSize = 0;
             if(result.getPdf() != null) {
+                pdfSize = getFileSize(result.getPdf().getUri());
                 scanResult.put("isPdfAvailable",true);
                 scanResult.put("PdfUri",String.valueOf(result.getPdf().getUri()));
                 scanResult.put("PdfPageCount",result.getPdf().getPageCount());
             }
+            
+            // Add size information
+            scanResult.put("totalImageSize", totalImageSize);
+            scanResult.put("pdfSize", pdfSize);
+            scanResult.put("imageSizes", imageSizes);
+            
             data.putExtra("ScanResult", new Gson().toJson(scanResult));
             setResult(Activity.RESULT_OK, data);
 
@@ -132,6 +170,67 @@ public class ScannerActivity extends AppCompatActivity {
             Log.d("Scanner Error",getString(R.string.error_default_message));
         }
         finish();
+    }
+    
+    /**
+     * Calculate file size from URI
+     */
+    private long getFileSize(Uri uri) {
+        try {
+            if (uri.getScheme().equals("content")) {
+                // For content URIs, use ContentResolver
+                android.database.Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+                if (cursor != null) {
+                    try {
+                        int sizeIndex = cursor.getColumnIndex(android.provider.OpenableColumns.SIZE);
+                        if (sizeIndex != -1 && cursor.moveToFirst()) {
+                            return cursor.getLong(sizeIndex);
+                        }
+                    } finally {
+                        cursor.close();
+                    }
+                }
+            } else if (uri.getScheme().equals("file")) {
+                // For file URIs, use File
+                File file = new File(uri.getPath());
+                return file.length();
+            }
+        } catch (Exception e) {
+            Log.e("Scanner", "Error calculating file size", e);
+        }
+        return 0;
+    }
+    
+    /**
+     * Show dialog when size limit is exceeded
+     */
+    private void showSizeExceededDialog(long totalSize, long currentImageSize, int pageNumber) {
+        String totalSizeFormatted = Formatter.formatFileSize(this, totalSize);
+        String limitFormatted = Formatter.formatFileSize(this, sizeLimit);
+        String imageSizeFormatted = Formatter.formatFileSize(this, currentImageSize);
+        
+        String message = String.format(
+            "Adding page %d would exceed the %s limit.\n\nCurrent total: %s\nPage size: %s",
+            pageNumber, limitFormatted, totalSizeFormatted, imageSizeFormatted
+        );
+        
+        new AlertDialog.Builder(this)
+            .setTitle("Size Limit Exceeded")
+            .setMessage(message)
+            .setPositiveButton("OK", (dialog, which) -> {
+                Intent data = new Intent();
+                data.putExtra("error", "SIZE_LIMIT_EXCEEDED");
+                setResult(Activity.RESULT_CANCELED, data);
+                finish();
+            })
+            .setNegativeButton("Cancel", (dialog, which) -> {
+                Intent data = new Intent();
+                data.putExtra("error", "SIZE_LIMIT_EXCEEDED");
+                setResult(Activity.RESULT_CANCELED, data);
+                finish();
+            })
+            .setCancelable(false)
+            .show();
     }
 
 }

@@ -202,6 +202,12 @@ class NativeDocumentScanner {
       return 'pageLimit must be a number between 1 and 50, or -1 for unlimited pages';
     }
 
+    if (config.maxSizeLimit !== undefined) {
+      if (typeof config.maxSizeLimit !== 'number' || config.maxSizeLimit < 1) {
+        return 'maxSizeLimit must be a positive number (in bytes)';
+      }
+    }
+
     // Platform-specific validations
     if (Platform.OS === 'ios' && config.isGalleryImportRequired) {
       console.warn('[NativeDocScanner] Gallery import is not supported on iOS, ignoring setting');
