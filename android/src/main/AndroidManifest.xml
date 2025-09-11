@@ -1,0 +1,14 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <!-- Required permissions for document scanning -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    
+    <!-- Activity declaration for document scanning -->
+    <application>
+        <activity
+            android:name="com.nativedocscanner.ScannerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+    </application>
+    
+</manifest>

@@ -35,12 +35,29 @@ Add the following permissions to your `Info.plist`:
 
 ### Android Setup
 
-Add the following permissions to your `android/app/src/main/AndroidManifest.xml`:
+1. **Add permissions** to your `android/app/src/main/AndroidManifest.xml`:
 
 ```xml
 <uses-permission android:name="android.permission.CAMERA" />
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 ```
+
+2. **Add the ScannerActivity** to your `android/app/src/main/AndroidManifest.xml` inside the `<application>` tag:
+
+```xml
+<application>
+    <!-- Your existing activities -->
+    
+    <!-- Document Scanner Activity -->
+    <activity
+        android:name="com.nativedocscanner.ScannerActivity"
+        android:exported="false"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        
+</application>
+```
+
+3. **For React Native 0.60+**: The library should auto-link. For older versions, manually link the library.
 
 ## 🚀 Usage
 
@@ -249,6 +266,11 @@ This library uses **automatic architecture detection** to provide optimal perfor
 - Ensure the library is properly installed: `npm install react-native-native-doc-scanner`
 - For React Native < 0.60, manually link the library
 - Clean and rebuild your project
+
+#### "Activity class does not exist" (Android)
+- Make sure you've added the ScannerActivity to your AndroidManifest.xml
+- Ensure the activity declaration is inside the `<application>` tag
+- Clean and rebuild your Android project: `cd android && ./gradlew clean`
 
 #### iOS Build Issues
 - Make sure iOS deployment target is 15.1 or higher
