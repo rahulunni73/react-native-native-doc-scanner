@@ -10,7 +10,7 @@ High-performance cross-platform document scanner for React Native with native br
 
 - 📄 **Cross-Platform Document Scanning** - iOS VisionKit + Android ML Kit
 - 🚀 **Architecture Agnostic** - Works with both Legacy Bridge and New Architecture (TurboModules)
-- 📋 **Multi-Page Scanning** - Scan up to 10 pages in a single session
+- 📋 **Multi-Page Scanning** - Scan up to 50 pages in a single session (or unlimited with -1)
 - 🎯 **PDF Generation** - Automatic PDF creation from scanned documents
 - 📱 **Gallery Import** - Import images from gallery (Android only)
 - ⚡ **High Performance** - Native implementation for optimal speed
@@ -98,7 +98,7 @@ const scanDocuments = async () => {
 |----------|------|-------------|---------|
 | `scannerMode` | `SCANNER_MODE` | Quality/speed tradeoff | `SCANNER_MODE.FULL` |
 | `isGalleryImportRequired` | `boolean` | Allow gallery import (Android only) | `false` |
-| `pageLimit` | `number` | Maximum pages to scan (1-10) | `5` |
+| `pageLimit` | `number` | Maximum pages to scan (1-50, or -1 for unlimited) | `5` |
 
 ### Scanner Modes
 
