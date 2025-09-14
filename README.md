@@ -2,13 +2,14 @@
 
 [![npm version](https://badge.fury.io/js/react-native-native-doc-scanner.svg)](https://badge.fury.io/js/react-native-native-doc-scanner)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20Android-lightgrey.svg)](https://github.com/username/react-native-native-doc-scanner)
+[![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20Android-lightgrey.svg)](https://github.com/rahulunni73/react-native-native-doc-scanner)
 
-High-performance cross-platform document scanner for React Native with native bridge architecture and TurboModule compatibility.
+High-performance cross-platform document scanner for React Native with **session-based crash recovery**, native bridge architecture, and TurboModule compatibility.
 
 ## ✨ Features
 
 - 📄 **Cross-Platform Document Scanning** - iOS VisionKit + Android ML Kit
+- 🔄 **Session-Based Crash Recovery** - Automatic recovery of scan results after app crashes or memory kills
 - 🚀 **Architecture Agnostic** - Works with both Legacy Bridge and New Architecture (TurboModules)
 - 📋 **Multi-Page Scanning** - Scan up to 50 pages in a single session (or unlimited with -1)
 - 🎯 **PDF Generation** - Automatic PDF creation from scanned documents
@@ -17,6 +18,7 @@ High-performance cross-platform document scanner for React Native with native br
 - 🔧 **TypeScript Support** - Full type definitions included
 - 🎨 **Customizable** - Multiple scanner modes and quality settings
 - 📏 **Size Management** - Built-in file size validation with configurable limits
+- 🛡️ **Process Kill Protection** - Handles Android memory pressure and process termination gracefully
 
 ## 📦 Installation
 
@@ -112,6 +114,193 @@ const scanDocuments = async () => {
 };
 ```
 
+## 🔄 Crash Recovery System
+
+This library includes a **session-based crash recovery system** that automatically handles app crashes and memory kills during scanning operations, ensuring users never lose their scan results.
+
+### How It Works
+
+The crash recovery system tracks scan sessions with timestamps and persists results to device storage. When your app restarts after a crash or memory kill, you can automatically recover the scan results from the interrupted session.
+
+**Key Features:**
+- ✅ **Session-based tracking** - Only recovers results from the current interrupted scan session
+- ✅ **Cross-platform** - Works on both iOS and Android
+- ✅ **Automatic persistence** - No manual intervention required
+- ✅ **Memory kill protection** - Specifically designed for Android memory pressure scenarios
+- ✅ **Clean state management** - Clears recovery data after successful delivery
+
+### Basic Crash Recovery Usage
+
+```typescript
+import NativeDocScanner, { CrashRecoveryResult } from 'react-native-native-doc-scanner';
+
+// Check for crash recovery when your app starts or component mounts
+const checkForRecovery = async () => {
+  try {
+    const recoveryResult: CrashRecoveryResult | null = await NativeDocScanner.checkForCrashRecovery();
+    
+    if (recoveryResult && recoveryResult.fromCrashRecovery) {
+      console.log('🔄 Recovered scan result from interrupted session!');
+      
+      // Parse the recovered result
+      const scanResult = JSON.parse(recoveryResult.scanResult);
+      
+      // Handle the recovered result (same as normal scan result)
+      console.log('Recovered documents:', scanResult.imagePaths);
+      console.log('Recovered PDF:', scanResult.PdfUri);
+      
+      // Show user notification about recovery
+      Alert.alert(
+        'Scan Recovered',
+        'Your previous scan was automatically recovered!',
+        [{ text: 'OK', onPress: () => handleRecoveredScan(scanResult) }]
+      );
+    } else {
+      console.log('No pending scan results to recover');
+    }
+  } catch (error) {
+    console.error('Crash recovery check failed:', error);
+  }
+};
+
+// Call this when your app starts
+useEffect(() => {
+  checkForRecovery();
+}, []);
+```
+
+### React Component Integration
+
+```typescript
+import React, { useEffect, useState } from 'react';
+import { View, Text, Alert, TouchableOpacity } from 'react-native';
+import NativeDocScanner, { ScannerConfig, SCANNER_MODE } from 'react-native-native-doc-scanner';
+
+const DocumentScannerScreen = () => {
+  const [hasRecoveredResult, setHasRecoveredResult] = useState(false);
+  const [recoveredResult, setRecoveredResult] = useState(null);
+
+  useEffect(() => {
+    checkForCrashRecovery();
+  }, []);
+
+  const checkForCrashRecovery = async () => {
+    try {
+      const recovery = await NativeDocScanner.checkForCrashRecovery();
+      
+      if (recovery?.fromCrashRecovery) {
+        const scanResult = JSON.parse(recovery.scanResult);
+        setRecoveredResult(scanResult);
+        setHasRecoveredResult(true);
+        
+        // Show recovery banner
+        Alert.alert(
+          '🔄 Scan Recovered',
+          'Your previous scan was automatically recovered after the app restart.',
+          [
+            { text: 'View Result', onPress: () => handleScanResult(scanResult) },
+            { text: 'Dismiss', onPress: () => setHasRecoveredResult(false) }
+          ]
+        );
+      }
+    } catch (error) {
+      console.error('Recovery check failed:', error);
+    }
+  };
+
+  const startScanning = async () => {
+    const config: ScannerConfig = {
+      scannerMode: SCANNER_MODE.FULL,
+      isGalleryImportRequired: false,
+      pageLimit: 5
+    };
+
+    try {
+      const result = await NativeDocScanner.scanDocumentAsync(config);
+      handleScanResult(result);
+    } catch (error) {
+      console.error('Scanning failed:', error);
+    }
+  };
+
+  const handleScanResult = (result) => {
+    console.log('Scan successful:', result);
+    // Process your scan result here
+  };
+
+  return (
+    <View>
+      {hasRecoveredResult && (
+        <View style={{ backgroundColor: '#e3f2fd', padding: 10 }}>
+          <Text>🔄 Recovered scan result available</Text>
+        </View>
+      )}
+      
+      <TouchableOpacity onPress={startScanning}>
+        <Text>Start Scanning</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+```
+
+### Advanced Crash Recovery Methods
+
+#### `checkForCrashRecovery(): Promise<CrashRecoveryResult | null>`
+
+Checks for scan results from interrupted sessions and returns only results from the current session.
+
+```typescript
+const recoveryResult = await NativeDocScanner.checkForCrashRecovery();
+if (recoveryResult) {
+  const { scanResult, fromCrashRecovery } = recoveryResult;
+  // scanResult: JSON string of the scan result
+  // fromCrashRecovery: Always true when recovery data is available
+}
+```
+
+#### `getLastScanResult(): Promise<LastScanResult | null>`
+
+Legacy method for backward compatibility. Gets the last scan result regardless of session.
+
+```typescript
+const lastResult = await NativeDocScanner.getLastScanResult();
+if (lastResult) {
+  const scanResult = JSON.parse(lastResult.scanResult);
+  // Process the last scan result
+}
+```
+
+#### `clearScanCache(): Promise<boolean>`
+
+Manually clear all cached scan data. Useful for testing or cleanup.
+
+```typescript
+const cleared = await NativeDocScanner.clearScanCache();
+console.log('Cache cleared:', cleared);
+```
+
+### When Crash Recovery Triggers
+
+**Android Scenarios:**
+- 📱 App process killed by Android due to memory pressure during ML Kit scanning
+- 🔄 App force-closed or restarted during scanning
+- ⚡ System-initiated memory cleanup (TRIM_MEMORY_COMPLETE events)
+- 🔋 Low memory conditions during document processing
+
+**iOS Scenarios:**
+- 📱 App terminated while VisionKit scanner is active
+- 🔄 App backgrounded and memory reclaimed during scanning
+- ⚡ Manual app termination during document processing
+
+### Important Notes
+
+- ✅ **Session-based**: Only recovers results from the **current interrupted scan session**, not previous completed scans
+- ✅ **Automatic cleanup**: Recovery data is automatically cleared after successful delivery
+- ✅ **Cross-platform consistency**: Same API and behavior on both iOS and Android
+- ✅ **No false positives**: Won't show old results from previous app sessions
+- ✅ **Memory efficient**: Uses minimal storage for recovery data
+
 ## ⚙️ Configuration Options
 
 ### ScannerConfig
@@ -204,6 +393,24 @@ Check if the native module is ready for use.
 
 **Returns:** Boolean indicating readiness
 
+#### `checkForCrashRecovery(): Promise<CrashRecoveryResult | null>`
+
+Check for scan results from interrupted sessions (crash recovery). Only returns results from the current interrupted scan session.
+
+**Returns:** Promise resolving to crash recovery data or null if no pending results
+
+#### `getLastScanResult(): Promise<LastScanResult | null>`
+
+Get the last scan result (legacy method for backward compatibility).
+
+**Returns:** Promise resolving to last scan result or null
+
+#### `clearScanCache(): Promise<boolean>`
+
+Clear all cached scan data. Useful for testing or manual cleanup.
+
+**Returns:** Promise resolving to true when cleared successfully
+
 ### Types
 
 #### ScannerResult
@@ -233,6 +440,23 @@ interface ScannerCapabilities {
   };
   platform: 'ios' | 'android';          // Current platform
   framework: 'VisionKit' | 'MLKit' | 'Unknown'; // Native framework
+}
+```
+
+#### CrashRecoveryResult
+
+```typescript
+interface CrashRecoveryResult {
+  scanResult: string;                    // Scan result data recovered from interrupted session
+  fromCrashRecovery: boolean;            // Whether this result came from crash recovery (always true)
+}
+```
+
+#### LastScanResult
+
+```typescript
+interface LastScanResult {
+  scanResult: string;                    // Scan result data (JSON string)
 }
 ```
 
@@ -295,7 +519,7 @@ console.log('Capabilities:', NativeDocScanner.getCapabilities());
 
 ## 📄 License
 
-MIT © [Your Name](https://github.com/username)
+MIT © [rahulunni73](https://github.com/rahulunni73)
 
 ## 🤝 Contributing
 
@@ -303,9 +527,9 @@ Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md)
 
 ## 📞 Support
 
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/username/react-native-native-doc-scanner/issues)
-- 💡 **Feature Requests**: [GitHub Discussions](https://github.com/username/react-native-native-doc-scanner/discussions)
-- 📧 **Email**: your.email@example.com
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/rahulunni73/react-native-native-doc-scanner/issues)
+- 💡 **Feature Requests**: [GitHub Discussions](https://github.com/rahulunni73/react-native-native-doc-scanner/discussions)
+- 📧 **Email**: rahulunni73@gmail.com
 
 ---
 

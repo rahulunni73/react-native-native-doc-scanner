@@ -27,6 +27,8 @@ export type {
   ScannerPromiseResult,
   ScannerCapabilities,
   NativeDocScannerInterface,
+  CrashRecoveryResult,
+  LastScanResult,
 } from './types';
 
 // Enums
@@ -38,7 +40,7 @@ export { default } from './DocumentScanner';
 /**
  * Library version
  */
-export const VERSION = '1.0.0';
+export const VERSION = '2.0.0';
 
 /**
  * Library information
@@ -46,8 +48,8 @@ export const VERSION = '1.0.0';
 export const LIBRARY_INFO = {
   name: 'react-native-native-doc-scanner',
   version: VERSION,
-  description: 'High-performance cross-platform document scanner with native bridge architecture',
-  repository: 'https://github.com/username/react-native-native-doc-scanner',
-  author: 'Your Name',
+  description: 'High-performance cross-platform document scanner with session-based crash recovery, native bridge architecture, and TurboModule compatibility',
+  repository: 'https://github.com/rahulunni73/react-native-native-doc-scanner',
+  author: 'rahulunni73',
   license: 'MIT',
 } as const;

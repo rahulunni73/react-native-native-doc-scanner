@@ -7,6 +7,8 @@ import type {
   ScannerPromiseResult,
   ScannerCapabilities,
   NativeDocScannerInterface,
+  CrashRecoveryResult,
+  LastScanResult,
 } from './types';
 import { ScannerError } from './types';
 
@@ -178,6 +180,77 @@ class NativeDocumentScanner {
    */
   public isReady(): boolean {
     return this.isInitialized && this.nativeModule !== null;
+  }
+
+  /**
+   * Check for scan results from interrupted sessions (crash recovery)
+   * Only returns results from the current interrupted scan session
+   * @returns Promise resolving to recovery data or null if no pending results
+   */
+  public async checkForCrashRecovery(): Promise<CrashRecoveryResult | null> {
+    if (!this.isInitialized || !this.nativeModule) {
+      throw new Error('Native module is not initialized');
+    }
+
+    if (!this.nativeModule.checkForCrashRecovery) {
+      console.warn('[NativeDocScanner] Crash recovery not supported in this version');
+      return null;
+    }
+
+    try {
+      const result = await this.nativeModule.checkForCrashRecovery();
+      return result;
+    } catch (error) {
+      console.error('[NativeDocScanner] Failed to check for crash recovery:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get the last scan result (legacy method for backward compatibility)
+   * @returns Promise resolving to last scan result or null
+   */
+  public async getLastScanResult(): Promise<LastScanResult | null> {
+    if (!this.isInitialized || !this.nativeModule) {
+      throw new Error('Native module is not initialized');
+    }
+
+    if (!this.nativeModule.getLastScanResult) {
+      console.warn('[NativeDocScanner] getLastScanResult not supported in this version');
+      return null;
+    }
+
+    try {
+      const result = await this.nativeModule.getLastScanResult();
+      return result;
+    } catch (error) {
+      console.error('[NativeDocScanner] Failed to get last scan result:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Clear all cached scan data
+   * Useful for testing or manual cleanup
+   * @returns Promise resolving to true when cleared
+   */
+  public async clearScanCache(): Promise<boolean> {
+    if (!this.isInitialized || !this.nativeModule) {
+      throw new Error('Native module is not initialized');
+    }
+
+    if (!this.nativeModule.clearScanCache) {
+      console.warn('[NativeDocScanner] clearScanCache not supported in this version');
+      return false;
+    }
+
+    try {
+      const result = await this.nativeModule.clearScanCache();
+      return result;
+    } catch (error) {
+      console.error('[NativeDocScanner] Failed to clear scan cache:', error);
+      throw error;
+    }
   }
 
   /**

@@ -110,6 +110,24 @@ export interface ScannerPromiseResult {
 }
 
 /**
+ * Crash recovery result from interrupted scan sessions
+ */
+export interface CrashRecoveryResult {
+  /** Scan result data recovered from interrupted session */
+  scanResult: string;
+  /** Whether this result came from crash recovery */
+  fromCrashRecovery: boolean;
+}
+
+/**
+ * Last scan result wrapper
+ */
+export interface LastScanResult {
+  /** Scan result data */
+  scanResult: string;
+}
+
+/**
  * Native module interface for document scanning
  */
 export interface NativeDocScannerInterface {
@@ -124,6 +142,26 @@ export interface NativeDocScannerInterface {
     onSuccess: (result: string) => void,
     onError: ScanErrorCallback,
   ): void;
+
+  /**
+   * Check for scan results from interrupted sessions (crash recovery)
+   * Only returns results from the current interrupted scan session
+   * @returns Promise resolving to recovery data or null if no pending results
+   */
+  checkForCrashRecovery(): Promise<CrashRecoveryResult | null>;
+
+  /**
+   * Get the last scan result (legacy method for backward compatibility)
+   * @returns Promise resolving to last scan result or null
+   */
+  getLastScanResult(): Promise<LastScanResult | null>;
+
+  /**
+   * Clear all cached scan data
+   * Useful for testing or manual cleanup
+   * @returns Promise resolving to true when cleared
+   */
+  clearScanCache(): Promise<boolean>;
 }
 
 /**
