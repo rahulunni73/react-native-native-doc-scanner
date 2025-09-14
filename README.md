@@ -6,6 +6,8 @@
 
 High-performance cross-platform document scanner for React Native with **session-based crash recovery**, native bridge architecture, and TurboModule compatibility.
 
+> ⚠️ **Educational Purpose Disclaimer**: This library is provided for educational and learning purposes only. It is not intended for use in production applications without thorough testing and validation in your specific environment. Use at your own risk.
+
 ## ✨ Features
 
 - 📄 **Cross-Platform Document Scanning** - iOS VisionKit + Android ML Kit
