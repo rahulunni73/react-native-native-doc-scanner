@@ -486,38 +486,6 @@ This library uses **automatic architecture detection** to provide optimal perfor
 
 ## 🔧 Troubleshooting
 
-### Common Issues
-
-#### "Native module not found"
-- Ensure the library is properly installed: `npm install react-native-native-doc-scanner`
-- For React Native < 0.60, manually link the library
-- Clean and rebuild your project
-
-#### "Activity class does not exist" (Android)
-- Make sure you've added the ScannerActivity to your AndroidManifest.xml
-- Ensure the activity declaration is inside the `<application>` tag
-- Clean and rebuild your Android project: `cd android && ./gradlew clean`
-
-#### iOS Build Issues
-- Make sure iOS deployment target is 15.1 or higher
-- Verify VisionKit framework is available on your target devices
-- Check camera permissions in Info.plist
-
-#### Android Build Issues
-- Ensure minSdkVersion is 21 or higher
-- Verify Google Play Services is available
-- Check camera and storage permissions
-
-### Debug Information
-
-Check if the library is working correctly:
-
-```typescript
-import NativeDocScanner from 'react-native-native-doc-scanner';
-
-console.log('Scanner ready:', NativeDocScanner.isReady());
-console.log('Capabilities:', NativeDocScanner.getCapabilities());
-```
 
 ## 📄 License
 
