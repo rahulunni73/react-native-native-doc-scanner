@@ -1,6 +1,6 @@
 {
   "name": "react-native-native-doc-scanner",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "High-performance cross-platform document scanner with session-based crash recovery, native bridge architecture, and TurboModule compatibility",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
