@@ -18,6 +18,12 @@ export interface ScannerConfig {
   
   /** Maximum total file size in bytes (default: 100MB) */
   maxSizeLimit?: number;
+
+  /** JPEG compression quality (0.0–1.0, default: 1.0). Lower = smaller file. 0.7–0.8 recommended for documents. */
+  compressionQuality?: number;
+
+  /** Max width or height in pixels. Image is scaled down proportionally if either dimension exceeds this. */
+  maxImageDimension?: number;
 }
 
 /**

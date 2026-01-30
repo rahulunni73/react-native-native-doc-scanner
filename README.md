@@ -313,6 +313,8 @@ console.log('Cache cleared:', cleared);
 | `isGalleryImportRequired` | `boolean` | Allow gallery import (Android only) | `false` |
 | `pageLimit` | `number` | Maximum pages to scan (1-50, or -1 for unlimited) | `5` |
 | `maxSizeLimit` | `number` | Maximum total file size in bytes (optional) | `104857600` (100MB) |
+| `compressionQuality` | `number` | JPEG compression quality (0.0–1.0). Lower = smaller file. | `1.0` |
+| `maxImageDimension` | `number` | Max width or height in pixels. Scales down proportionally. | `undefined` (no resize) |
 
 ### Scanner Modes
 
@@ -359,6 +361,28 @@ NativeDocScanner.scanDocumentAsync(config)
       // Android: User was alerted after scanning
     }
   });
+```
+
+### Image Compression & Resizing
+
+Optionally compress and/or resize scanned images to reduce file sizes. Both parameters are optional and default to no compression and no resizing, preserving existing behavior.
+
+- **`compressionQuality`** — JPEG encoding quality from `0.0` (smallest file, lowest quality) to `1.0` (largest file, highest quality). Values of `0.7`–`0.8` work well for documents.
+- **`maxImageDimension`** — Maximum width or height in pixels. Images exceeding this dimension are scaled down proportionally (aspect ratio preserved). Images already smaller are not upscaled.
+
+Size validation (`maxSizeLimit`) runs on the **compressed/resized** output, so reported sizes in `totalImageSize` and `imageSizes` reflect the actual files returned.
+
+```typescript
+const config: ScannerConfig = {
+  scannerMode: SCANNER_MODE.FULL,
+  isGalleryImportRequired: false,
+  pageLimit: 10,
+  compressionQuality: 0.7,   // 70% JPEG quality
+  maxImageDimension: 2048,    // Scale down images larger than 2048px
+};
+
+const result = await NativeDocScanner.scanDocumentAsync(config);
+// result.totalImageSize and result.imageSizes reflect compressed sizes
 ```
 
 ## 📋 API Reference

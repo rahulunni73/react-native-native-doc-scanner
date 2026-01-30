@@ -281,6 +281,18 @@ class NativeDocumentScanner {
       }
     }
 
+    if (config.compressionQuality !== undefined) {
+      if (typeof config.compressionQuality !== 'number' || config.compressionQuality < 0 || config.compressionQuality > 1) {
+        return 'compressionQuality must be a number between 0.0 and 1.0';
+      }
+    }
+
+    if (config.maxImageDimension !== undefined) {
+      if (typeof config.maxImageDimension !== 'number' || !Number.isInteger(config.maxImageDimension) || config.maxImageDimension < 1) {
+        return 'maxImageDimension must be a positive integer';
+      }
+    }
+
     // Platform-specific validations
     if (Platform.OS === 'ios' && config.isGalleryImportRequired) {
       console.warn('[NativeDocScanner] Gallery import is not supported on iOS, ignoring setting');

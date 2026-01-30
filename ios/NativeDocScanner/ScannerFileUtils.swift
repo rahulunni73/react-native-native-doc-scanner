@@ -13,17 +13,24 @@ struct ScannerFileUtils {
   
   
   // Helper method to save image to documents directory and return the file path
-  static func saveImage(image: UIImage, withName name: String) -> String? {
-    guard let data = image.jpegData(compressionQuality: 1.0) else {
+  static func saveImage(image: UIImage, withName name: String, compressionQuality: CGFloat = 1.0, maxImageDimension: CGFloat? = nil) -> String? {
+    let processedImage: UIImage
+    if let maxDim = maxImageDimension {
+      processedImage = resizeImageToMaxDimension(image: image, maxDimension: maxDim) ?? image
+    } else {
+      processedImage = image
+    }
+
+    guard let data = processedImage.jpegData(compressionQuality: compressionQuality) else {
       return nil
     }
-    
+
     let fileManager = FileManager.default
     let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
-    
+
     let fileName = generateFileName(withMimeType: "image/jpeg");
     let fileURL = documentsURL.appendingPathComponent("\(fileName)")
-    
+
     do {
       try data.write(to: fileURL)
       return fileURL.path
@@ -31,6 +38,24 @@ struct ScannerFileUtils {
       print("Error saving image: \(error)")
       return nil
     }
+  }
+
+  // Resize image so its largest dimension does not exceed maxDimension (scale down only)
+  static func resizeImageToMaxDimension(image: UIImage, maxDimension: CGFloat) -> UIImage? {
+    let size = image.size
+    let maxSide = max(size.width, size.height)
+
+    // Only scale down, never up
+    guard maxSide > maxDimension else { return image }
+
+    let scale = maxDimension / maxSide
+    let newSize = CGSize(width: size.width * scale, height: size.height * scale)
+
+    let renderer = UIGraphicsImageRenderer(size: newSize)
+    let resized = renderer.image { _ in
+      image.draw(in: CGRect(origin: .zero, size: newSize))
+    }
+    return resized
   }
   
   
